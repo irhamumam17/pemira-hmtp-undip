@@ -10,10 +10,10 @@
     {{-- <h5 class="text-center">Terima kasih telah menggunakan hak suara anda</h5> --}}
     <ul class="verified">
         <li>
-            Selanjutnya, Silahkan upload foto KTP/KTM atau Identitas lainnya sebagai bukti bahwa anda telah melakukan pemilihan
+            Selanjutnya, Silahkan upload foto KTM/IRS atau Identitas lainnya sebagai bukti bahwa anda telah melakukan pemilihan
         </li>
         <li>
-            Jika anda tidak mengupload KTP/KTM atau Identitas lainnya, maka suara anda tidak akan dihitung
+            Jika anda tidak mengupload KTM/IRS atau Identitas lainnya, maka suara anda tidak akan dihitung
         </li>
         <li>Ukuran file maksimal 4 MB dengan extensi .jpg , .jpeg , atau .png</li>
     </ul>

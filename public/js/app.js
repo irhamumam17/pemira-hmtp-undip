@@ -119978,6 +119978,8 @@ module.exports = function(module) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vform__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vform */ "./node_modules/vform/dist/vform.common.js");
 /* harmony import */ var vform__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vform__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _objectToFormData__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objectToFormData */ "./resources/js/objectToFormData.js");
+/* harmony import */ var _objectToFormData__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_objectToFormData__WEBPACK_IMPORTED_MODULE_1__);
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -120001,7 +120003,9 @@ window.Vuetify = __webpack_require__(/*! vuetify */ "./node_modules/vuetify/dist
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
- // import Loading from 'vue-loading-overlay';
+
+
+window.objectToFormData = _objectToFormData__WEBPACK_IMPORTED_MODULE_1___default.a; // import Loading from 'vue-loading-overlay';
 // import 'vue-loading-overlay/dist/vue-loading.css';
 
 Vue.use(Vuetify);
@@ -120063,6 +120067,79 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     forceTLS: true
 // });
+
+/***/ }),
+
+/***/ "./resources/js/objectToFormData.js":
+/*!******************************************!*\
+  !*** ./resources/js/objectToFormData.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+(function (global, factory) {
+  ( false ? undefined : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() :  true ? !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : undefined;
+})(this, function () {
+  'use strict';
+
+  function isUndefined(value) {
+    return value === undefined;
+  }
+
+  function isObject(value) {
+    return value === Object(value);
+  }
+
+  function isArray(value) {
+    return Array.isArray(value);
+  }
+
+  function isFile(value) {
+    return value instanceof File;
+  }
+
+  function isDate(value) {
+    return value instanceof Date;
+  }
+
+  function objectToFormData(obj, fd, pre) {
+    fd = fd || new FormData();
+
+    if (isUndefined(obj)) {
+      return fd;
+    } else if (isArray(obj)) {
+      obj.forEach(function (value) {
+        var key = pre + '[]';
+        objectToFormData(value, fd, key);
+      });
+    } else if (isObject(obj) && !isFile(obj) && !isDate(obj)) {
+      Object.keys(obj).forEach(function (prop) {
+        var value = obj[prop];
+
+        if (isArray(value)) {
+          while (prop.length > 2 && prop.lastIndexOf('[]') === prop.length - 2) {
+            prop = prop.substring(0, prop.length - 2);
+          }
+        }
+
+        var key = pre ? pre + '[' + prop + ']' : prop;
+        objectToFormData(value, fd, key);
+      });
+    } else {
+      fd.append(pre, obj);
+    }
+
+    return fd;
+  }
+
+  return objectToFormData;
+});
 
 /***/ }),
 

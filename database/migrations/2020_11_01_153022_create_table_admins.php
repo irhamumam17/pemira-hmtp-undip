@@ -17,8 +17,9 @@ class CreateTableAdmins extends Migration
             $table->id();
             $table->string('username');
             $table->string('password');
-            $table->integer('status');
-            $table->dateTime('last_login');
+            $table->integer('status')->default(0);
+            $table->text('auth_session')->nullable()->default(null)->comment('Stores the id of the user session');
+            $table->dateTime('last_login')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

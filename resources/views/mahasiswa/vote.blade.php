@@ -67,7 +67,7 @@
                                   <v-card-text class="box-visi-misi">
                                     <div class="modal-visi">
                                         <div class="modal-visi-title">Visi :</div>
-                                        @{{ formModal.visi }}
+                                        <p v-html="formModal.visi"></p>
                                     </div>
                                     <div class="modal-misi">
                                         <div class="modal-misi-title">Misi :</div>
@@ -116,7 +116,7 @@
                               <v-card-title class="headline">
                                 Lanjutkan Pemilihan?
                               </v-card-title>
-                              <v-card-text>Pastikan Anda Memilih Paslon Yang Anda Yakini.</v-card-text>
+                              <v-card-text>Pastikan Anda Memilih Paslon Sesuai Hati Nurani Anda.</v-card-text>
                               <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <v-btn

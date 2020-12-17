@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -14,6 +15,7 @@ class AdminController extends Controller
     public function index()
     {
         //
+        return view('admin.admin.index');
     }
 
     /**
@@ -21,6 +23,7 @@ class AdminController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function create()
     {
         //
@@ -35,8 +38,29 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         //
-    }
+        $request->validate([
+            'username' => 'required|min:5|unique:admins,username,',
+            'password' => 'required|min:5'
+        ]);
+        try {
+            $data = Admin::create([
+                'username' => $request->username,
+                'password' => $request->password
+            ]);
 
+            return ([
+                'status' => 'success',
+                'data' => $data,
+                'message' => 'Admin Berhasil Dimasukkan'
+            ]);
+        } catch (\Throwable $th) {
+            return ([
+                'status' => 'success',
+                'data' => null,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
     /**
      * Display the specified resource.
      *
@@ -66,9 +90,27 @@ class AdminController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Admin $admin)
     {
-        //
+        $request->validate([
+            'username' => 'required|min:5|unique:admins,username,'.$admin->id,
+            'password' => 'sometimes|nullable|min:5'
+        ]);
+        try {
+            $request->password==null ? $data = $request->only(['username']) : $data = $request->all();
+            $admin->update($data);
+            return ([
+                'status' => 'success',
+                'data' => $admin,
+                'message' => 'Admin Berhasil Diubah'
+            ]);
+        } catch (\Throwable $th) {
+            return ([
+                'status' => 'success',
+                'data' => null,
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -77,8 +119,30 @@ class AdminController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Admin $admin)
     {
-        //
+        try {
+            $admin->delete();
+            return response()->json([
+                'status' => 'success',
+                'data' => null,
+                'message' => 'Admin Sukses Di Hapus.'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'failed',
+                'data' => null,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function get_admin(){
+        $data = Admin::all();
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+            'message' => 'Data Sukses Di Dapatkan.'
+        ]);
     }
 }

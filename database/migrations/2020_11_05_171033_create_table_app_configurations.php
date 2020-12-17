@@ -15,9 +15,8 @@ class CreateTableAppConfigurations extends Migration
     {
         Schema::create('app_configurations', function (Blueprint $table) {
             $table->id();
-            $table->string('app_name');
-            $table->string('icon');
-            $table->string('logo');
+            $table->string('name');
+            $table->text('detail');
             $table->timestamps();
         });
     }

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Mahasiswa;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class AuthenticationController extends Controller
@@ -22,27 +24,40 @@ class AuthenticationController extends Controller
     }
     public function admin_login_post(Request $request){
         $validator  = Validator::make($request->all(),[
-            'username' => 'required|string|exists:admins,username',
+            'username' => 'required|string',
             'password' => 'required|string'
         ]);
         if($validator->fails()){
+            $error_msg = array_map(function ($object) { return $object; }, $validator->errors()->all());
             return ([
                 'status' => 'failed',
                 'data' => null,
-                'message' => $validator->errors()
+                'message' => implode(', ', $error_msg)
             ]);
         }
         $auth = $request->only('username', 'password');
-        $auth['status'] = 1;
         if(auth()->guard('admin')->attempt($auth)){
+            if(auth()->guard('admin')->user()->status == 1){
+                auth()->guard('admin')->logout();
+                return ([
+                    'status' => 'failed',
+                    'data' => null,
+                    'message' => 'Anda Sedang Login di Sesi Lain.'
+                ]);
+            }
+            Admin::where('id','=',Auth::guard('admin')->user()->id)->update([
+                'status' => 1,
+                'last_login' => Carbon::now()
+            ]);
             return ([
                 'status' => 'success',
                 'data' => Auth::guard('admin'),
                 'message' => 'Login Berhasil'
             ]);
         }
+        auth()->guard('admin')->logout();
         return ([
-            'status' => 'error',
+            'status' => 'failed',
             'data' => null,
             'message' => 'Email atau Password Salah'
         ]);
@@ -77,12 +92,13 @@ class AuthenticationController extends Controller
             ]);
         }
         if(auth()->guard('mahasiswa')->attempt($auth)){
-            if(auth()->guard('mahasiswa')->user()->status == 1){
+            $request->session()->regenerate();
+            if(auth()->guard('mahasiswa')->user()->auth_session){
                 auth()->guard('mahasiswa')->logout();
                 return ([
                     'status' => 'failed',
                     'data' => null,
-                    'message' => 'Anda Sedang Login di Sesi Lain.'
+                    'message' => 'Akun Anda Sedang Login di Sesi Lain. Hubungi Admin Apabila Anda Tidak Merasa Login.'
                 ]);
             }
             if(auth()->guard('mahasiswa')->user()->status == 2){
@@ -94,7 +110,9 @@ class AuthenticationController extends Controller
                 ]);
             }
             Mahasiswa::where('id','=',Auth::guard('mahasiswa')->user()->id)->update([
-                'status' => 1
+                'status' => 1,
+                'auth_session' => Session::getId(),
+                'last_login' => Carbon::now()
             ]);
             return ([
                 'status' => 'success',
@@ -110,6 +128,7 @@ class AuthenticationController extends Controller
         ]);
     }
     public function admin_logout(){
+        Admin::find(auth()->guard('admin')->user()->id)->update([ 'status' => 0 ]);
         auth()->guard('admin')->logout();
         return redirect(route('home'));
     }

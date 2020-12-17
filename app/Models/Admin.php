@@ -14,7 +14,18 @@ class Admin extends Authenticatable
     use SoftDeletes;
     use Notifiable;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'username','password','status','last_login'
+    ];
+
+    protected $hidden = [
+        'password',
+    ];
+
+    protected $attributes = [
+        'status' => 0,
+        'last_login' => null,
+    ];
 
     public function setPasswordAttribute($value){
         $this->attributes['password'] = bcrypt($value);

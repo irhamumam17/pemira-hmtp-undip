@@ -10,6 +10,10 @@ class Pemilihan extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
+    protected $fillable = [
+        'mahasiswa_id','paslons_id','foto','status'
+    ];
     public function mahasiswa(){
         return $this->belongsTo(Mahasiswa::class,'mahasiswa_id');
     }

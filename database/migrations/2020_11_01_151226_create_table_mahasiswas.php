@@ -18,11 +18,14 @@ class CreateTableMahasiswas extends Migration
             $table->string('nim');
             $table->string('name');
             $table->year('angkatan');
-            $table->string('kelas');
+            $table->string('email');
             $table->string('password');
+            $table->string('hint_password');
             $table->dateTime('start_session')->nullable();
             $table->dateTime('end_session')->nullable();
-            $table->integer('status');
+            $table->integer('status')->default(0);
+            $table->text('auth_session')->nullable()->default(null)->comment('Stores the id of the user session');
+            $table->dateTime('last_login')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

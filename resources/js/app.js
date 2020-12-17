@@ -27,6 +27,8 @@ import {
     HasError,
     AlertError
 } from "vform";
+import objectToFormData from "./objectToFormData";
+window.objectToFormData = objectToFormData;
 // import Loading from 'vue-loading-overlay';
 // import 'vue-loading-overlay/dist/vue-loading.css';
 

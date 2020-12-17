@@ -52,7 +52,6 @@
         </div>
         </v-app>
     </div>
-</body>
 @include('mahasiswa.includes.assets.js')
 <script>
     let $body = $("body");
@@ -62,4 +61,5 @@
     });
 </script>
 @stack('script')
+</body>
 </html>

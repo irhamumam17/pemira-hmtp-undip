@@ -18,6 +18,7 @@ class CreateTablePemilihans extends Migration
             $table->unsignedBigInteger('mahasiswa_id');
             $table->unsignedBigInteger('paslons_id');
             $table->string('foto')->nullable();
+            $table->integer('status')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

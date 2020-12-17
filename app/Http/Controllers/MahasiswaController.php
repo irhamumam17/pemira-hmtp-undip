@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\MahasiswaImport;
+use App\Mail\MailSendAccount;
 use App\Models\Mahasiswa;
 use App\Models\Paslon;
 use App\Models\Pemilihan;
@@ -11,7 +13,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpParser\Node\Stmt\TryCatch;
 
 class MahasiswaController extends Controller
 {
@@ -22,9 +29,17 @@ class MahasiswaController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.mahasiswa.index');
     }
 
+    public function getDataAll(){
+        $mahasiswa = Mahasiswa::all();
+        return ([
+            'status' => 'success',
+            'data' => $mahasiswa,
+            'message' => 'Data Berhasil Didapatkan'
+        ]);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -32,7 +47,7 @@ class MahasiswaController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**
@@ -43,7 +58,35 @@ class MahasiswaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nim' => 'required|min:5|unique:mahasiswas,nim,NULL,id,deleted_at,NULL',
+            'name' => 'required',
+            'angkatan' => 'required|integer|min:1900|max:2021',
+            'email' => 'required|email|unique:mahasiswas,email,NULL,id,deleted_at,NULL',
+            'start_session' => 'required|date_format:Y-m-d H:i',
+            'end_session' => 'required|date_format:Y-m-d H:i',
+        ]);
+        try {
+            $mahasiswa = Mahasiswa::create([
+                'nim' => $request->nim,
+                'name' => $request->nim,
+                'angkatan' => $request->angkatan,
+                'hint_password' => Str::random(6),
+                'start_session' => $request->start_session,
+                'end_session' => $request->end_session,
+            ]);
+            return ([
+                'status' => 'success',
+                'data' => $mahasiswa,
+                'message' => 'Data Berhasil Disimpan'
+            ]);
+        } catch (\Throwable $th) {
+            return ([
+                'status' => 'failed',
+                'data' => $th->getMessage(),
+                'message' => 'Data Gagal Disimpan'
+            ]);
+        }
     }
 
     /**
@@ -75,9 +118,31 @@ class MahasiswaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Mahasiswa $mahasiswa)
     {
         //
+        $request->validate([
+            'nim' => 'required|min:5|unique:mahasiswas,nim,'.$mahasiswa->id.',id,deleted_at,NULL',
+            'name' => 'required',
+            'angkatan' => 'required|integer|min:1900|max:2021',
+            'email' => 'required|email|unique:mahasiswas,email,'.$mahasiswa->id.',id,deleted_at,NULL',
+            'start_session' => 'required|date_format:Y-m-d H:i',
+            'end_session' => 'required|date_format:Y-m-d H:i',
+        ]);
+        try {
+            $mahasiswa->update($request->all());
+            return ([
+                'status' => 'success',
+                'data' => $mahasiswa,
+                'message' => 'Mahasiswa Berhasil Diubah'
+            ]);
+        } catch (\Throwable $th) {
+            return ([
+                'status' => 'failed',
+                'data' => null,
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -86,203 +151,112 @@ class MahasiswaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Mahasiswa $mahasiswa)
     {
         //
-    }
-
-    public function pemilihan(){
-        $cek_vote = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
-        if(!empty($cek_vote)){
-            return redirect(route('mahasiswa.identification_view'));
-        }
-        return view('mahasiswa.vote');
-    }
-    
-    public function get_calon(){
-        $paslon = Paslon::with('ketua','wakil')->orderBy('nomor_urut','asc')->get();
-        if(!empty($paslon)){
-            return ([
-                'status' => 'success',
-                'data' => $paslon,
-                'message' => 'Berhasil'
+        try {
+            Paslon::whereHas('pemilihan',function($q) use ($mahasiswa){
+                $q->where('mahasiswa_id','=',$mahasiswa->id);
+            })->update([
+                'jumlah_suara' => DB::raw('jumlah_suara-1')
             ]);
-        }
-        return ([
-            'status' => 'failed',
-            'data' => null,
-            'message' => 'Data Gagal Didapatkan'
-        ]);
-    }
+            Pemilihan::where('mahasiswa_id','=',$mahasiswa->id)->delete();
+            PemilihanTemp::where('mahasiswa_id','=',$mahasiswa->id)->delete();
+            $mahasiswa->delete();
 
-    public function identification_view(){
-        $cek_vote = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
-        if(!$cek_vote){
-            return redirect(route('mahasiswa.pemilihan'));
-        }
-        if($cek_vote->foto != null){
-            return redirect(route('mahasiswa.review'));
-        }
-        return view('mahasiswa.upload_identity');
-    }
-
-    public function review(){
-        $tempPemilihan = PemilihanTemp::with('mahasiswa','paslon.ketua','paslon.wakil')->where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
-        if(!$tempPemilihan){
-            return redirect(route('mahasiswa.pemilihan'));
-        }
-        if($tempPemilihan->foto == null){
-            return redirect(route('mahasiswa.identification_view'));
-        }
-        return view('mahasiswa.review',compact('tempPemilihan'));
-    }
-
-    public function pemilihan_temporary_post(Request $request){
-        $validator  = Validator::make($request->all(),[
-            'nim' => 'required',
-            'id_calon' => 'required',
-            'nomor_urut' => 'required'
-        ]);
-        if($validator->fails()){
-            $error_msg = array_map(function ($object) {
-                return $object;
-            }, $validator->errors()->all());
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => implode(', ', $error_msg)
-            ]);
-        }
-
-        PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->delete();
-        $tempPemilihan = PemilihanTemp::insertGetId([
-            'mahasiswa_id' => Auth::guard('mahasiswa')->user()->id,
-            'paslons_id' => $request->id_calon
-        ]);
-
-        if($tempPemilihan){
             return ([
                 'status' => 'success',
                 'data' => null,
-                'message' => 'Pemilihan Sukses'
+                'message' => 'Mahasiswa Berhasil Dihapus'
             ]);
-        }
-        return ([
-            'status' => 'failed',
-            'data' => null,
-            'message' => 'Pemilihan Gagal'
-        ]);
-    }
-
-    public function identification_upload(Request $request){
-        $validator  = Validator::make($request->all(),[
-            'foto' => 'mimes:jpeg,jpg,png|required|max:5000',
-        ]);
-        if($validator->fails()){
-            $error_msg = array_map(function ($object) {
-                return $object;
-            }, $validator->errors()->all());
+        } catch (\Throwable $th) {
             return ([
                 'status' => 'failed',
                 'data' => null,
-                'message' => implode(', ', $error_msg)
-            ]);
-        }
-        $name = $request->file('foto')->getClientOriginalName();
-
-        $tempPemilihan = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
-        if(!empty($tempPemilihan)){
-            $file = public_path().'/assets/images/id_card/'.pathinfo($tempPemilihan->foto)['basename'];
-            if(file_exists( $file)){
-                File::delete($file);
-            }
-            
-            $foto_name = Carbon::now()->format('dmYHis').$name;
-            // Storage::put($foto_name, $request->file('foto'));
-            $request->file('foto')->move('assets/images/id_card/', $foto_name);
-            return ([
-                'status' => 'success',
-                'data' => $foto_name,
-                'message' => 'Berhasil Di Upload'
+                'message' => $th->getMessage()
             ]);
         }
     }
-    public function identification_post(Request $request){
-        $validator  = Validator::make($request->all(),[
-            'foto' => 'required|string',
-        ]);
-        if($validator->fails()){
-            $error_msg = array_map(function ($object) {
-                return $object;
-            }, $validator->errors()->all());
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => implode(', ', $error_msg)
-            ]);
-        }
-        PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->update([
-            'foto' => $request->foto
-        ]);
-        return ([
+
+    public function get_mahasiswa(){
+        $data = Mahasiswa::all();
+        return response()->json([
             'status' => 'success',
-            'data' => null,
-            'message' => 'Sukses'
+            'data' => $data,
+            'message' => 'Data Sukses Di Dapatkan.'
         ]);
     }
-    public function revote(){
-        $tempPemilihan = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
-        try {
-            $file = public_path().'/assets/images/id_card/'.pathinfo($tempPemilihan->foto)['basename'];
-            if(file_exists( $file)){
-                File::delete($file);
-            }
-            PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->delete();
-            return ([
-                'status' => 'success',
-                'data' => null,
-                'message' => 'Sukses'
-            ]);
-        } catch (\Throwable $th) {
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => $th
-            ]);
-        }
-    }
-    public function pemilihan_post(){
-        $tempPemilihan = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
-        try {
-            Pemilihan::insert([
-                'mahasiswa_id' => Auth::guard('mahasiswa')->user()->id,
-                'paslons_id' => $tempPemilihan->paslons_id,
-                'foto' => pathinfo($tempPemilihan->foto)['basename']
-            ]);
-            PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->delete();
 
-            Mahasiswa::where('id','=',Auth::guard('mahasiswa')->user()->id)->update([
-                'status' => 2
+    public function import(Request $request){
+        $validator  = Validator::make($request->all(),[
+            'file' => 'required|mimes:csv,xls,xlsx'
+        ]);
+        if($validator->fails()){
+            $error_msg = array_map(function ($object) {
+                return $object;
+            }, $validator->errors()->all());
+            return ([
+                'status' => 'failed',
+                'data' => null,
+                'message' => implode(', ', $error_msg)
             ]);
-            Paslon::where('id','=',$tempPemilihan->paslons_id)->update([
-                'jumlah_suara' => DB::raw('jumlah_suara+1')
-            ]);
-            auth()->guard('mahasiswa')->logout();
+        }
+        try {
+            $file = $request->file('file');
+            $nama_file = rand().$file->getClientOriginalName();
+            Excel::import(new MahasiswaImport, $file);
+            $file->move('assets/file/import/',$nama_file);
             return ([
                 'status' => 'success',
                 'data' => null,
-                'message' => 'Pemilihan Sukses Dilakukan'
+                'message' => 'Berhasil Import Data Mahasiswa'
             ]);
         } catch (\Throwable $th) {
             return ([
                 'status' => 'failed',
                 'data' => null,
-                'message' => $th
+                'message' => $th->getMessage()
             ]);
         }
     }
-    public function coba(){
-        $destinationPath = '/assets/images/id_card/';
-        $data = File::delete(public_path().$destinationPath.'11112020042345Somad.png');
+
+    public function reset_session($id){
+        $mahasiswa = Mahasiswa::find($id);
+        $user_session = $mahasiswa->auth_session;
+        if($user_session){
+            $mahasiswa->update([
+                'status' => 0,
+                'auth_session' => null
+            ]);
+            Session::getHandler()->destroy($user_session);
+            return ([
+                'status' => 'success',
+                'data' => null,
+                'message' => 'Akun Mahasiswa Berhasil Di Reset'
+            ]);
+        }
+        return ([
+            'status' => 'failed',
+            'data' => null,
+            'message' => 'Sesi Mahasiswa Tidak Ditemukan.'
+        ]);
+    }
+
+    public function sendEmailAccount(Request $request){
+        try {
+            $mahasiswa = Mahasiswa::find($request->id);
+            Mail::to($mahasiswa->email)->send(new MailSendAccount($mahasiswa));
+            return ([
+                'status' => 'success',
+                'data' => null,
+                'message' => 'Akun Mahasiswa Berhasil Di Kirim'
+            ]);
+        } catch (\Throwable $th) {
+            return ([
+                'status' => 'failed',
+                'data' => null,
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 }
