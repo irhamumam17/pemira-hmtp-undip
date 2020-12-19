@@ -50,6 +50,11 @@ Route::group(['prefix'=>'admin','as'=>'admin.','middleware' => 'admin'],function
     Route::get('data-pemilihan/get-data',[App\Http\Controllers\PemilihanController::class,'getDataPemilihan'])->name('data_pemilihan.get_data');
     Route::put('data-pemilihan/valid/{id}',[App\Http\Controllers\PemilihanController::class,'validVote'])->name('data_pemilihan.valid');
     Route::put('data-pemilihan/invalid/{id}',[App\Http\Controllers\PemilihanController::class,'invalidVote'])->name('data_pemilihan.invalid');
+
+    //report
+    Route::get('laporan',[App\Http\Controllers\ReportController::class,'index'])->name('report.index');
+    Route::get('laporan/get-data',[App\Http\Controllers\ReportController::class,'getData'])->name('report.get_data');
+    Route::get('laporan/get-perolehan-suara',[App\Http\Controllers\ReportController::class,'getPerolehanSuara'])->name('report.get_perolehan_suara');
     // cek
     Route::get('/logout',[App\Http\Controllers\AuthenticationController::class,'admin_logout'])->name('logout');
 });
@@ -65,4 +70,5 @@ Route::group(['prefix'=>'mahasiswa','as'=>'mahasiswa.','middleware' => 'mahasisw
     Route::get('/pemilihan/post/confirm',[App\Http\Controllers\PemilihanController::class, 'pemilihan_post'])->name('pemilihan_post');
     Route::get('/logout',[App\Http\Controllers\AuthenticationController::class,'mahasiswa_logout'])->name('logout');
 });
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/quickcount', [App\Http\Controllers\PemilihanController::class, 'quickcount'])->name('quickcount.index');
+Route::post('/quickcount/get-data', [App\Http\Controllers\PemilihanController::class, 'getDataQuickcount'])->name('quickcount.get_data');

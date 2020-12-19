@@ -34,6 +34,9 @@ class PemilihanController extends Controller
             $pemilihan->update([
                 'status' => 0
             ]);
+            Paslon::where('id','=',$pemilihan->paslons_id)->update([
+                'jumlah_suara' => DB::raw('jumlah_suara+1')
+            ]);
             return ([
                 'status' => 'success',
                 'data' => null,
@@ -53,6 +56,9 @@ class PemilihanController extends Controller
             $pemilihan->update([
                 'status' => 1
             ]);
+            Paslon::where('id','=',$pemilihan->paslons_id)->update([
+                'jumlah_suara' => DB::raw('jumlah_suara-1')
+            ]);
             return ([
                 'status' => 'success',
                 'data' => null,
@@ -67,6 +73,24 @@ class PemilihanController extends Controller
         }
     }
 
+    public function quickcount(){
+        return view('quickcount.index');
+    }
+
+    public function getDataQuickcount(){
+        $data = Paslon::with('ketua','wakil')->withCount('pemilihan')->get();
+        $total_mhs = Mahasiswa::count();
+        $suara_masuk = Pemilihan::count();
+        return ([
+            'status' => 'success',
+            'data' => ([
+                'suara' =>  $data,
+                'total_mhs' => $total_mhs,
+                'suara_masuk' => $suara_masuk
+            ]),
+            'message' => 'Berhasil'
+        ]);
+    }
     public function index(){
         $cek_vote = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
         if(!empty($cek_vote)){

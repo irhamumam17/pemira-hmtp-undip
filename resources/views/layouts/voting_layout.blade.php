@@ -45,7 +45,7 @@
 <body>
     <div id="app">
         <v-app style="background-color: transparent">
-        <div class="modal"><!-- Place at bottom of page --></div>
+        {{-- <div class="modal"><!-- Place at bottom of page --></div> --}}
         <div class="container-body">
             @include('mahasiswa.includes.header')
             @yield('content')
@@ -54,11 +54,11 @@
     </div>
 @include('mahasiswa.includes.assets.js')
 <script>
-    let $body = $("body");
-    $(document).on({
-        ajaxStart: function() { $body.addClass("loading");    },
-        ajaxStop: function() { $body.removeClass("loading"); }    
-    });
+    // let $body = $("body");
+    // $(document).on({
+    //     ajaxStart: function() { $body.addClass("loading");    },
+    //     ajaxStop: function() { $body.removeClass("loading"); }    
+    // });
 </script>
 @stack('script')
 </body>

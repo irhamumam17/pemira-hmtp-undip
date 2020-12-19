@@ -14,6 +14,7 @@ class Paslon extends Model
     protected $fillable=[
         'nomor_urut','ketua_mahasiswa_id','wakil_mahasiswa_id','foto','visi','misi'
     ];
+    
     public function ketua(){
         return $this->belongsTo(Mahasiswa::class,'ketua_mahasiswa_id');
     }

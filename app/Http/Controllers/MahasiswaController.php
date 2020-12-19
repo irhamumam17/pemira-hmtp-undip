@@ -63,8 +63,6 @@ class MahasiswaController extends Controller
             'name' => 'required',
             'angkatan' => 'required|integer|min:1900|max:2021',
             'email' => 'required|email|unique:mahasiswas,email,NULL,id,deleted_at,NULL',
-            'start_session' => 'required|date_format:Y-m-d H:i',
-            'end_session' => 'required|date_format:Y-m-d H:i',
         ]);
         try {
             $mahasiswa = Mahasiswa::create([
@@ -72,8 +70,6 @@ class MahasiswaController extends Controller
                 'name' => $request->nim,
                 'angkatan' => $request->angkatan,
                 'hint_password' => Str::random(6),
-                'start_session' => $request->start_session,
-                'end_session' => $request->end_session,
             ]);
             return ([
                 'status' => 'success',
@@ -126,8 +122,6 @@ class MahasiswaController extends Controller
             'name' => 'required',
             'angkatan' => 'required|integer|min:1900|max:2021',
             'email' => 'required|email|unique:mahasiswas,email,'.$mahasiswa->id.',id,deleted_at,NULL',
-            'start_session' => 'required|date_format:Y-m-d H:i',
-            'end_session' => 'required|date_format:Y-m-d H:i',
         ]);
         try {
             $mahasiswa->update($request->all());

@@ -18,7 +18,7 @@ class Pemilihan extends Model
         return $this->belongsTo(Mahasiswa::class,'mahasiswa_id');
     }
     public function paslon(){
-        return $this->belongsTo(Paslon::class,'paslon_id');
+        return $this->belongsTo(Paslon::class,'paslons_id');
     }
     public function getFotoAttribute($value){
         if($value!=null){
