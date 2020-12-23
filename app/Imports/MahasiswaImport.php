@@ -20,12 +20,12 @@ class MahasiswaImport implements ToModel, WithStartRow
             'nim' => $row[0],
             'name' => $row[1],
             'angkatan' => $row[2],
-            'email' => $row[4],
+            'email' => $row[3],
             'hint_password' => Str::random(6),
         ]);
     }
 
     public function startRow(): int{
-        return 2;
+        return 1;
     }
 }

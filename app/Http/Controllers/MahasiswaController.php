@@ -67,8 +67,9 @@ class MahasiswaController extends Controller
         try {
             $mahasiswa = Mahasiswa::create([
                 'nim' => $request->nim,
-                'name' => $request->nim,
+                'name' => $request->name,
                 'angkatan' => $request->angkatan,
+                'email' => $request->email,
                 'hint_password' => Str::random(6),
             ]);
             return ([

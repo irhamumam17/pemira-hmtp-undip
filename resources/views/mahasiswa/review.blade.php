@@ -12,17 +12,17 @@
         <div class="container-candidate-confirmation">
             <h6 class="txt-title-confirmation">Pasangan Calon :</h6>
             <div class="container-candidate-detail">
-                <p class="txt-number-confirmation">@{{ mainData.paslon.nomor_urut }}</p>
+                <p class="txt-number-confirmation">{{ $tempPemilihan->paslon->nomor_urut }}</p>
                 <div class="container-candidate-profile">
                     <div class="container-candidate-confirmation-image">
-                        <img src="{{ asset('assets/pemira/images/calon/presma.png') }}" alt="" class="img-candidate-confirmation-presma">
+                        <img src="{{ $tempPemilihan->paslon->foto }}" alt="" class="img-candidate-confirmation-presma">
                     </div>
                     <div class="container-candidate-name-confirmation">
                         <div class="container-candidate-confirmation-detail">
-                            <p class="txt-profile-name-candidate">@{{ mainData.paslon.ketua.name }}</p>
+                            <p class="txt-profile-name-candidate">{{ $tempPemilihan->paslon->ketua->name }}</p>
                         </div>
                         <div class="container-candidate-confirmation-detail">
-                            <p class="txt-profile-name-candidate">@{{ mainData.paslon.wakil.name }}</p>
+                            <p class="txt-profile-name-candidate">{{ $tempPemilihan->paslon->wakil->name }}</p>
                         </div>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
         <div class="container-candidate-confirmation">
             <h6 class="txt-title-confirmation">Foto Identitas :</h6>
             <div class="container-img-preview">
-                <img class="img-preview" id="preview" :src="mainData.foto">
+                <img class="img-preview" id="preview" src="{{$tempPemilihan->foto}}">
             </div>
         </div>
         <!-- End Candidate BPM -->
@@ -42,78 +42,78 @@
     <h6 class="text-justify">Apakah anda sudah yakin dengan pilihan anda ?
     </h6>
     <div class="container-button-confirmation">
-        <button class=" mdc-button mdc-button--raised btn-margin-10" @click="dialogRevote=true">Tidak</button>
-        <button type="button" class=" mdc-button mdc-button--raised btn-margin-10" @click="dialogConfirm=true">Ya</button>
-        <template>
-            <v-row justify="center">
-              <v-dialog
-                v-model="dialogConfirm"
-                persistent
-                max-width="290"
-              >
-                <v-card>
-                  <v-card-title class="headline">
-                    Selesai Pemilihan?
-                  </v-card-title>
-                  <v-card-text>Pastikan Paslon Sesuai Pilihan Anda Dan Foto Identitas Sesuai Dengan Foto Yang Anda Upload .</v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="green darken-1"
-                      text
-                      @click="dialogConfirm = false"
-                    >
-                      Batal
-                    </v-btn>
-                    <v-btn
-                      color="green darken-1"
-                      :loading="loadingConfirm"
-                      :disabled="loadingConfirm"
-                      text
-                      @click="submitPilihan"
-                    >
-                      Ok
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-row>
-          </template>
-        <template>
-            <v-row justify="center">
-              <v-dialog
-                v-model="dialogRevote"
-                persistent
-                max-width="290"
-              >
-                <v-card>
-                  <v-card-title class="headline">
-                    Ulangi Pemilihan?
-                  </v-card-title>
-                  <v-card-text>Anda akan mengulangi pemilihan dari awal.</v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="green darken-1"
-                      text
-                      @click="dialogRevote = false"
-                    >
-                      Batal
-                    </v-btn>
-                    <v-btn
-                      color="green darken-1"
-                      :loading="loading"
-                      :disabled="loading"
-                      text
-                      @click="submitRevote"
-                    >
-                      Ok
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-row>
-          </template>
+        <button class=" mdc-button mdc-button--raised btn-margin-10" onclick="revote()">Tidak</button>
+        <button type="button" class=" mdc-button mdc-button--raised btn-margin-10" onclick="vote()">Ya</button>
+        <!--<template>-->
+        <!--    <v-row justify="center">-->
+        <!--      <v-dialog-->
+        <!--        v-model="dialogConfirm"-->
+        <!--        persistent-->
+        <!--        max-width="290"-->
+        <!--      >-->
+        <!--        <v-card>-->
+        <!--          <v-card-title class="headline">-->
+        <!--            Selesai Pemilihan?-->
+        <!--          </v-card-title>-->
+        <!--          <v-card-text>Pastikan Paslon Sesuai Pilihan Anda Dan Foto Identitas Sesuai Dengan Foto Yang Anda Upload .</v-card-text>-->
+        <!--          <v-card-actions>-->
+        <!--            <v-spacer></v-spacer>-->
+        <!--            <v-btn-->
+        <!--              color="green darken-1"-->
+        <!--              text-->
+        <!--              @click="dialogConfirm = false"-->
+        <!--            >-->
+        <!--              Batal-->
+        <!--            </v-btn>-->
+        <!--            <v-btn-->
+        <!--              color="green darken-1"-->
+        <!--              :loading="loadingConfirm"-->
+        <!--              :disabled="loadingConfirm"-->
+        <!--              text-->
+        <!--              @click="submitPilihan"-->
+        <!--            >-->
+        <!--              Ok-->
+        <!--            </v-btn>-->
+        <!--          </v-card-actions>-->
+        <!--        </v-card>-->
+        <!--      </v-dialog>-->
+        <!--    </v-row>-->
+        <!--  </template>-->
+        <!--<template>-->
+        <!--    <v-row justify="center">-->
+        <!--      <v-dialog-->
+        <!--        v-model="dialogRevote"-->
+        <!--        persistent-->
+        <!--        max-width="290"-->
+        <!--      >-->
+        <!--        <v-card>-->
+        <!--          <v-card-title class="headline">-->
+        <!--            Ulangi Pemilihan?-->
+        <!--          </v-card-title>-->
+        <!--          <v-card-text>Anda akan mengulangi pemilihan dari awal.</v-card-text>-->
+        <!--          <v-card-actions>-->
+        <!--            <v-spacer></v-spacer>-->
+        <!--            <v-btn-->
+        <!--              color="green darken-1"-->
+        <!--              text-->
+        <!--              @click="dialogRevote = false"-->
+        <!--            >-->
+        <!--              Batal-->
+        <!--            </v-btn>-->
+        <!--            <v-btn-->
+        <!--              color="green darken-1"-->
+        <!--              :loading="loading"-->
+        <!--              :disabled="loading"-->
+        <!--              text-->
+        <!--              @click="submitRevote"-->
+        <!--            >-->
+        <!--              Ok-->
+        <!--            </v-btn>-->
+        <!--          </v-card-actions>-->
+        <!--        </v-card>-->
+        <!--      </v-dialog>-->
+        <!--    </v-row>-->
+        <!--  </template>-->
     </div>
 </div>
 </div>
@@ -184,5 +184,51 @@
                 }
             }
         })
+        function revote(){
+            Swal.fire({
+                title: 'Apakah Anda Yakin?',
+                text: "Pemilihan Akan Diulang Dari Awal",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes!'
+            }).then((result) => {
+                if (result.value) {
+                  Swal.fire({
+                      title: 'Please Wait...',
+                      allowEscapeKey: false,
+                      allowOutsideClick: false,
+                      didOpen: () => {
+                          Swal.showLoading();
+                      }
+                  });
+                  window.location.href = "{{route('mahasiswa.revote')}}";
+                }
+            })
+        }
+        function vote(){
+            Swal.fire({
+                title: 'Selesaikan Pemilihan?',
+                text: "Pastikan Paslon Sesuai Pilihan Anda Dan Foto Identitas Sesuai Dengan Foto Yang Anda Upload .",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes!'
+            }).then((result) => {
+                if (result.value) {
+                  Swal.fire({
+                      title: 'Please Wait...',
+                      allowEscapeKey: false,
+                      allowOutsideClick: false,
+                      didOpen: () => {
+                          Swal.showLoading();
+                      }
+                  });
+                  window.location.href = "{{route('mahasiswa.pemilihan_post')}}";
+                }
+            })
+        }
     </script>
 @endpush

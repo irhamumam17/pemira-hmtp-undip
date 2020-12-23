@@ -7,9 +7,9 @@
     <div class="event-logo-login">
         <img class="logo-login" src="{{ asset('assets/pemira/images/logo/pwk.jpeg') }}" alt="logo">
     </div>
-    <div class="line-divider">
-        <h2 class="title-login-event">MENJADI PEMIMPIN BERINTEGRITAS DI ERA MILENIAL</h2>
-    </div>
+    <!--<div class="line-divider">-->
+    <!--    <h2 class="title-login-event">MENJADI PEMIMPIN BERINTEGRITAS DI ERA MILENIAL</h2>-->
+    <!--</div>-->
 </div> --}}
 <!-- Form / Container Login Box -->
 <div class="container-login">
@@ -17,14 +17,20 @@
         <hr>
         <h2 class="title-login">LOGIN</h2>
     </div>
-
+    @error('error')
+    <!-- Box error -->
+    <div class="box-error-msg">
+        <p class="text-error-msg"><strong>{{ $message }}</strong></p>
+    </div>
+    <!-- End Box error -->
+    @enderror
     <!-- Input Username -->
-    <form v-on:submit.prevent="login">
-    {{-- <form> --}}
+    <!--<form v-on:submit.prevent="login">-->
+    <form method="post" action="{{route('mahasiswa.login_post')}}">
     {{csrf_field()}}
         <div class="line-divider">
             <div class="mdc-text-field mdc-text-field--outlined TBNoTes">
-                <input v-model="form.nim" type="text" name="nim" class="mdc-text-field__input" id="text-field-hero-input" required>
+                <input id="nim" v-model="form.nim" type="text" name="nim" class="mdc-text-field__input" id="text-field-hero-input" required>
                 <div class="mdc-notched-outline">
                     <div class="mdc-notched-outline__leading"></div>
                     <div class="mdc-notched-outline__notch">
@@ -38,7 +44,7 @@
         <!-- Input Password -->
         <div class="line-divider">
             <div class="mdc-text-field mdc-text-field--outlined TBEmail ">
-                <input v-model="form.password" type="password" name="password" class="mdc-text-field__input" id="text-field-hero-input" required>
+                <input id="password" v-model="form.password" type="password" name="password" class="mdc-text-field__input" id="text-field-hero-input" required>
                 <div class="mdc-notched-outline">
                     <div class="mdc-notched-outline__leading"></div>
                     <div class="mdc-notched-outline__notch">
@@ -90,32 +96,64 @@
                         Swal.showLoading();
                     }
                 });
-                this.form.post("{{ route('mahasiswa.login') }}")
-                    .then(response => {
-                        if(response.data.status=='failed'){
+                let fd= new FormData()
+                fd.append('nim', this.form.nim);
+                fd.append('password', this.form.password);
+                axios.post("{{ route('mahasiswa.login_post') }}", fd)
+                        .then(response => {
+                            if(response.data.status=='success'){
+                                Swal.fire(
+                                    'Berhasil',
+                                    response.data.message,
+                                    'success'
+                                ).then((value) => {
+                                    window.location = "{{ route('mahasiswa.pemilihan') }}";
+                                })
+                            }else if(response.data.status=='failed'){
+                                Swal.fire(
+                                    'Gagal',
+                                    response.data.message,
+                                    'error'
+                                )
+                            }
+                        }).catch(error => {
+                            console.log(error)
                             Swal.fire(
                                 'Gagal',
-                                response.data.message,
+                                error,
                                 'error'
                             )
-                        }else if(response.data.status=='success'){
-                            Swal.fire(
-                                'Berhasil',
-                                response.data.message,
-                                'success'
-                            ).then((value) => {
-                                window.location = "{{ route('mahasiswa.pemilihan') }}";
-                            })
-                        }
-                    })
-                    .catch(e => {
-                        console.log(e.response.data.message);
-                        Swal.fire(
-                            'Gagal',
-                            e.response.data.message,
-                            'error'
-                        )
-                    })
+                        });
+                // this.form.post("{{ route('mahasiswa.login') }}",{
+                //     headers: {
+                //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                //     }
+                // })
+                //     .then(response => {
+                //         if(response.data.status=='failed'){
+                //             Swal.fire(
+                //                 'Gagal',
+                //                 response.data.message,
+                //                 'error'
+                //             )
+                //         }else if(response.data.status=='success'){
+                //             Swal.fire(
+                //                 'Berhasil',
+                //                 response.data.message,
+                //                 'success'
+                //             ).then((value) => {
+                //                 window.location = "{{ route('mahasiswa.pemilihan') }}";
+                //             })
+                //         }
+                //     })
+                //     .catch(e => {
+                //         console.log(e.response.data.message);
+                //         Swal.fire(
+                //             'Gagal',
+                //             e.response.data.message,
+                //             'error'
+                //         )
+                //     })
                 this.form.clear()
             }
         }

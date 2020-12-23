@@ -18,27 +18,27 @@
         <li>Ukuran file maksimal 4 MB dengan extensi .jpg , .jpeg , atau .png</li>
     </ul>
 
-    <form id="form-upload-ktm" enctype="multipart/form-data">
+    <form id="form-upload-ktm" enctype="multipart/form-data" method="post" action="{{ route('mahasiswa.identification_post') }}">
         {{csrf_field()}}
         {{-- Preview KTP/KTM Sebelum Upload. Jika dibutuhkan dipakai, jika tidak tidak papa --}}
         {{-- Atau bisa dialihfungsikan sebagai contoh foto yang harus diupload --}}
         <div class="container-img-preview">
-            <img class="img-preview" id="preview" :src="imgURL">
+            <img class="img-preview" id="preview" src="{{ asset('assets/pemira/images/default/no-photo-available.png') }}">
         </div>
         <hr>
         <!-- Input KTP/KTM -->
         <label class="mdc-text-field mdc-text-field--fullwidth mdc-text-field--textarea mdc-text-field--no-label">
-            <input type="file" class="mdc-text-field__input" name="foto" accept="image/*" id="photo" required autofocus @change="readURL">
+            <input type="file" class="mdc-text-field__input" name="foto" accept="image/*" id="photo" required autofocus>
             <span class="mdc-notched-outline">
                 <span class="mdc-notched-outline__leading"></span>
                 <span class="mdc-notched-outline__trailing"></span>
             </span>
         </label>
         <!-- End Input KTP/KTM -->
-        {{-- @include('pemira.includes.errors') --}}
+        @include('mahasiswa.includes.errors')
         <div class="divider"></div>
         <h6>Apakah anda sudah yakin dengan pilihan anda dan bersedia untuk melanjutkan proses selanjutnya ?
-            {{-- Preview KTP/KTM Sebelum Upload. Jika dibutuhkan dipakai, jika tidak tidak papa
+            {{-- Preview KTM/IRS Sebelum Upload. Jika dibutuhkan dipakai, jika tidak tidak papa
     Atau bisa dialihfungsikan sebagai contoh foto yang harus diupload
     <div class="container-button-confirmation">
         <a href="#" id="dialog-upload" class="mx-auto mdc-button mdc-button--raised btn-margin-10">Upload</a>
@@ -47,7 +47,7 @@
     <div class="divider"></div>
     </h6> --}}
     <div class="container-button-confirmation">
-        <button type="button" @click="upload" class="mdc-button mdc-button--raised btn-margin-10 w-full">Review Pilihan</button>
+        <button type="button" onclick="upload()" class="mdc-button mdc-button--raised btn-margin-10 w-full">Review Pilihan</button>
     </div>
     </form>
 </div>
@@ -139,5 +139,30 @@
             }
         }
     });
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+            $('#preview').attr('src', e.target.result);
+            }
+            
+            reader.readAsDataURL(input.files[0]); // convert to base64 string
+        }
+    }
+    $("#photo").change(function() {
+        readURL(this);
+    });
+    function upload(){
+        Swal.fire({
+            title: 'Loading...',
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        $("#form-upload-ktm").submit();
+    }
     </script>
 @endpush

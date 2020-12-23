@@ -86,7 +86,7 @@ class PaslonController extends Controller
             $data = Paslon::create([
                 'nomor_urut' => $request->nomor_urut,
                 'ketua_mahasiswa_id' => $request->ketua_mahasiswa_id,
-                'wakil_mahasiswa_id' => $request->nomor_urut,
+                'wakil_mahasiswa_id' => $request->wakil_mahasiswa_id,
                 'visi' => $request->visi,
                 'misi' => $request->misi,
                 'foto' => $foto_name,

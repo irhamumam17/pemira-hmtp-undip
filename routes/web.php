@@ -17,19 +17,20 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [App\Http\Controllers\AuthenticationController::class,'index'])->name('home');
 
 Auth::routes();
-Route::group(['middleware' => 'guest'],function(){
-    Route::get('/mahasiswa/login',[App\Http\Controllers\AuthenticationController::class, 'mahasiswa_login_view'])->name('mahasiswa.login');
-    Route::post('/mahasiswa/login',[App\Http\Controllers\AuthenticationController::class, 'mahasiswa_login_post'])->middleware('voters_throttle')->name('mahasiswa.login');
+Route::group(['middleware' => ['guest','cors']],function(){
+    // Route::get('/mahasiswa/login',[App\Http\Controllers\AuthenticationController::class, 'mahasiswa_login_view'])->name('mahasiswa.login');
+    // Route::post('/mahasiswa/login',[App\Http\Controllers\AuthenticationController::class, 'mahasiswa_login_post'])->name('mahasiswa.login_post');
     Route::get('/admin/login',[App\Http\Controllers\AuthenticationController::class, 'admin_login_view'])->name('admin.login');
-    Route::post('/admin/login',[App\Http\Controllers\AuthenticationController::class, 'admin_login_post'])->name('admin.login');
+    Route::post('/admin/login/post',[App\Http\Controllers\AuthenticationController::class, 'admin_login_post'])->name('admin.login_post');
 });
-Route::group(['prefix'=>'admin','as'=>'admin.','middleware' => 'admin'],function(){
+Route::group(['prefix'=>'admin','as'=>'admin.','middleware' => ['admin','cors']],function(){
     //home
     Route::get('home',[App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::get('home/get-data',[App\Http\Controllers\DashboardController::class, 'getDataPemilihan'])->name('dashboard.get_data');
     //admin
     Route::resource('admin',App\Http\Controllers\AdminController::class);
     Route::get('get-admin',[App\Http\Controllers\AdminController::class, 'get_admin'])->name('admin.get_data');
+    Route::put('/admin/{id}/reset',[App\Http\Controllers\AdminController::class,'reset_session'])->name('admin.reset');
     //mahasiswa
     Route::resource('mahasiswa',App\Http\Controllers\MahasiswaController::class);
     Route::get('get-mahasiswa',[App\Http\Controllers\MahasiswaController::class, 'get_mahasiswa'])->name('mahasiswa.get_data');
@@ -58,7 +59,7 @@ Route::group(['prefix'=>'admin','as'=>'admin.','middleware' => 'admin'],function
     // cek
     Route::get('/logout',[App\Http\Controllers\AuthenticationController::class,'admin_logout'])->name('logout');
 });
-Route::group(['prefix'=>'mahasiswa','as'=>'mahasiswa.','middleware' => 'mahasiswa'],function(){
+Route::group(['prefix'=>'mahasiswa','as'=>'mahasiswa.','middleware' => ['mahasiswa','cors']],function(){
     Route::get('/pemilihan/index',[App\Http\Controllers\PemilihanController::class, 'index'])->name('pemilihan');
     Route::get('/pemilihan/get-calon',[App\Http\Controllers\PemilihanController::class, 'get_calon'])->name('get_calon');
     Route::get('/pemilihan/identification',[App\Http\Controllers\PemilihanController::class, 'identification_view'])->name('identification_view');

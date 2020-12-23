@@ -50,6 +50,10 @@
                   </td>
                   <td>@{{ item.last_login }}</td>
                   <td>
+                      <a href="javascript:void(0)" @click="resetModal(item.id)" class="text-success"
+                      data-toggle="tooltip" data-placement="top" title="Reset Akun">
+                      <i class="fas fa-redo"></i>
+                        </a>
                     <a href="javascript:void(0)" @click="editModal(item)" class="text-warning"
                       data-toggle="tooltip" data-placement="top" data-original-title="Edit">
                       <i class="fas fa-edit"></i>
@@ -305,6 +309,52 @@
                             'error'
                         )
                     })
+            },
+            resetModal(id) {
+                Swal.fire({
+                    title: 'Reset Akun Admin Ini?',
+                    text: "Sesi Admin Akun Di Setel Ulang.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes!'
+                }).then((result) => {
+                    if (result.value) {
+                      Swal.fire({
+                          title: 'Please Wait...',
+                          allowEscapeKey: false,
+                          allowOutsideClick: false,
+                          didOpen: () => {
+                              Swal.showLoading();
+                          }
+                      });
+                        url = "{{ route('admin.admin.reset', ':id') }}".replace(':id', id)
+                        console.log(url)
+                        this.form.put(url)
+                            .then(response => {
+                              if(response.data.status=='failed'){
+                                Swal.fire(
+                                  response.data.status,
+                                    response.data.message,
+                                    'error'
+                                )
+                              }else{
+                                Swal.fire(
+                                    response.data.status,
+                                    response.data.message,
+                                    'success'
+                                ).then((result) => {
+                                  this.getData()
+                                })
+                              }
+                            })
+                            .catch(e => {
+                              Swal.close();
+                                e.status != 422 ? console.log(e) : '';
+                            })
+                    }
+                })
             },
         }
     });

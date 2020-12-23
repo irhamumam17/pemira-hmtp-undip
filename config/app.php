@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'https://pemirahmtp.ukmpcc.org'),
 
     'asset_url' => env('ASSET_URL', null),
 

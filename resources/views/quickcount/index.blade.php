@@ -40,7 +40,7 @@
                 let chart_title = ['Pasangan', 'Jumlah Suara'];
                 let chart_body = [];
                 data.data.suara.forEach(function(d){
-                    chart_body.push([d.nomor_urut+'. '+d.ketua.name+' Dan '+d.wakil.name,d.pemilihan_count]);
+                    chart_body.push([d.nomor_urut+'. '+d.ketua.name+' Dan '+d.wakil.name,parseInt(d.pemilihan_count)]);
                 });
                 var options = {
                     chartArea: {

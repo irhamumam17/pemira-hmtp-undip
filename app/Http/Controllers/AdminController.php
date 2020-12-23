@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class AdminController extends Controller
 {
@@ -143,6 +144,27 @@ class AdminController extends Controller
             'status' => 'success',
             'data' => $data,
             'message' => 'Data Sukses Di Dapatkan.'
+        ]);
+    }
+    public function reset_session($id){
+        $admin = Admin::find($id);
+        $user_session = $admin->auth_session;
+        if($user_session){
+            $admin->update([
+                'status' => 0,
+                'auth_session' => null
+            ]);
+            Session::getHandler()->destroy($user_session);
+            return ([
+                'status' => 'success',
+                'data' => null,
+                'message' => 'Akun Admin Berhasil Di Reset'
+            ]);
+        }
+        return ([
+            'status' => 'failed',
+            'data' => null,
+            'message' => 'Sesi Admin Tidak Ditemukan.'
         ]);
     }
 }

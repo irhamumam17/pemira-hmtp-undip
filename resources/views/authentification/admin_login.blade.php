@@ -91,7 +91,7 @@
                         Swal.showLoading();
                     }
                 });
-                this.form.post("{{ route('admin.login') }}")
+                this.form.post("{{ route('admin.login_post') }}")
                     .then(response => {
                         if(response.data.status=='failed'){
                             Swal.fire(

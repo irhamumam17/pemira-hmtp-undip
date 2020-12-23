@@ -65,5 +65,6 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'mahasiswa' => \App\Http\Middleware\VoterMiddleware::class,
         'voters_throttle' => \App\Http\Middleware\VotersThrottleRequest::class,
+        'cors' => \App\Http\Middleware\cors::class,
     ];
 }

@@ -20,7 +20,7 @@
                 <div class="content" id="circle-btn">
                     <div class="container-title">
                         <p class="txt-title animate__animated animate__backInDown">PEMIRA<br>HMTP 2021</p>
-                        <p class="txt-subtitle animate__animated animate__backInUp">KLIK DISINI</p>
+                        <p class="txt-subtitle animate__animated animate__backInUp">Sudah Selesai</p>
                     </div>
                 </div>
             </div>
@@ -33,7 +33,7 @@
 <!-- Button Function -->
 <script type="text/javascript">
     document.getElementById("circle-btn").onclick = function () {
-        location.href = "{{route('mahasiswa.login')}}";
+        location.href = "javascript:void(0)";
     };
 </script>
 </html>

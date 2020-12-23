@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\File;
 class PemilihanController extends Controller
 {
     public function dataPemilihan(){
-        return view('admin.pemilihan.index');
+        $data = Pemilihan::with('mahasiswa','paslon')->get();
+        return view('admin.pemilihan.index',compact('data'));
     }
 
     public function getDataPemilihan(){
@@ -96,7 +97,8 @@ class PemilihanController extends Controller
         if(!empty($cek_vote)){
             return redirect(route('mahasiswa.identification_view'));
         }
-        return view('mahasiswa.vote');
+        $paslon = Paslon::with('ketua','wakil')->orderBy('nomor_urut','asc')->get();
+        return view('mahasiswa.vote',compact('paslon'));
     }
     
     public function get_calon(){
@@ -147,11 +149,12 @@ class PemilihanController extends Controller
             $error_msg = array_map(function ($object) {
                 return $object;
             }, $validator->errors()->all());
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => implode(', ', $error_msg)
-            ]);
+            return redirect(route('mahasiswa.pemilihan'))->withErrors(['error' => implode(', ', $error_msg)]);   
+            // return ([
+            //     'status' => 'failed',
+            //     'data' => null,
+            //     'message' => implode(', ', $error_msg)
+            // ]);
         }
 
         PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->delete();
@@ -161,17 +164,14 @@ class PemilihanController extends Controller
         ]);
 
         if($tempPemilihan){ 
-            return ([
-                'status' => 'success',
-                'data' => null,
-                'message' => 'Pemilihan Sukses'
-            ]);
+            // return ([
+            //     'status' => 'success',
+            //     'data' => null,
+            //     'message' => 'Pemilihan Sukses'
+            // ]);
+            return redirect(route('mahasiswa.identification_view'));   
         }
-        return ([
-            'status' => 'failed',
-            'data' => null,
-            'message' => 'Pemilihan Gagal'
-        ]);
+        return redirect(route('mahasiswa.pemilihan'))->withErrors(['error' => "gagal"]);   
     }
 
     public function identification_upload(Request $request){
@@ -209,26 +209,42 @@ class PemilihanController extends Controller
     }
     public function identification_post(Request $request){
         $validator  = Validator::make($request->all(),[
-            'foto' => 'required|string',
+            // 'foto' => 'required|string',
+            'foto' => 'mimes:jpeg,jpg,png|required|max:4000',
         ]);
         if($validator->fails()){
             $error_msg = array_map(function ($object) {
                 return $object;
             }, $validator->errors()->all());
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => implode(', ', $error_msg)
-            ]);
+            // return ([
+            //     'status' => 'failed',
+            //     'data' => null,
+            //     'message' => implode(', ', $error_msg)
+            // ]);
+            return redirect(route('mahasiswa.identification_view'))->withErrors(['error' => implode(', ', $error_msg)]);
         }
-        PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->update([
-            'foto' => $request->foto
-        ]);
-        return ([
-            'status' => 'success',
-            'data' => null,
-            'message' => 'Sukses'
-        ]);
+        try{
+            $name = $request->file('foto')->getClientOriginalName();
+
+            $tempPemilihan = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
+            if(!empty($tempPemilihan)){
+                $file = public_path().'/assets/images/id_card/'.pathinfo($tempPemilihan->foto)['basename'];
+                if(file_exists( $file)){
+                    File::delete($file);
+                }
+                
+                $foto_name = Carbon::now()->format('dmYHis').$name;
+                // Storage::put($foto_name, $request->file('foto'));
+                $request->file('foto')->move('assets/images/id_card/', $foto_name);
+                PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->update([
+                    'foto' => $foto_name
+                ]);
+                return redirect(route('mahasiswa.review')); 
+            }
+            return redirect(route('mahasiswa.identification_view'))->withErrors(['error' => "Terjadi Kesalahan"]);
+        } catch (\Throwable $th) {
+            return redirect(route('mahasiswa.identification_view'))->withErrors(['error' => $th->getMessage()]);
+        }
     }
     public function revote(){
         $tempPemilihan = PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->first();
@@ -238,17 +254,14 @@ class PemilihanController extends Controller
                 File::delete($file);
             }
             PemilihanTemp::where('mahasiswa_id','=',Auth::guard('mahasiswa')->user()->id)->delete();
-            return ([
-                'status' => 'success',
-                'data' => null,
-                'message' => 'Sukses'
-            ]);
+            // return ([
+            //     'status' => 'success',
+            //     'data' => null,
+            //     'message' => 'Sukses'
+            // ]);
+            return redirect(route('mahasiswa.pemilihan')); 
         } catch (\Throwable $th) {
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => $th
-            ]);
+            return redirect(route('mahasiswa.review'))->withErrors(['error' => $th->getMessage()]); 
         }
     }
     public function pemilihan_post(){
@@ -269,17 +282,9 @@ class PemilihanController extends Controller
                 'jumlah_suara' => DB::raw('jumlah_suara+1')
             ]);
             auth()->guard('mahasiswa')->logout();
-            return ([
-                'status' => 'success',
-                'data' => null,
-                'message' => 'Pemilihan Sukses Dilakukan'
-            ]);
+            return redirect(route('home'));
         } catch (\Throwable $th) {
-            return ([
-                'status' => 'failed',
-                'data' => null,
-                'message' => $th->getMessage()
-            ]);
+            return redirect(route('mahasiswa.review'))->withErrors(['error' => $th->getMessage()]); 
         }
     }
 }

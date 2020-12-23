@@ -653,7 +653,7 @@
                                     response.data.message,
                                     'success'
                                 ).then((result) => {
-                                  this.getData()
+                                    Swal.close();
                                 })
                               }
                           })
